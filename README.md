@@ -1,7 +1,7 @@
 # NentApp
 the idea:
 
-online:
+
 app call the API first 
 and then update the database
  
