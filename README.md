@@ -1,6 +1,5 @@
 # NentApp
 the idea:
-for simplicity 
 
 online:
 app call the API first 
