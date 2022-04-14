@@ -6,10 +6,13 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import java.util.*
 
-@Entity(tableName = "sectionDetail")
-data class SectionDetailEntity(
+@Entity(tableName = "section")
+data class SectionEntityUpdate(
 
     @PrimaryKey  val id: String,
     @ColumnInfo(name = "title") val title: String,
-    @ColumnInfo(name = "description") val description: String,
-)
+    @ColumnInfo(name = "name") val name: String,
+    @ColumnInfo(name = "href") val href: String?,
+
+
+    )

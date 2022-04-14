@@ -1,18 +1,20 @@
 package com.shenawynkov.data.repo
 
-import android.util.Log
 import com.shenawynkov.data.apiService.ApiService
 import com.shenawynkov.data.db.SectionDatabase
+import com.shenawynkov.data.db.SectionEntityFavUpdate
 import com.shenawynkov.data.mapper.mapToSectionDetail
-import com.shenawynkov.data.mapper.mapToSectionDetailEntity
 import com.shenawynkov.data.mapper.mapToSectionEntity
+import com.shenawynkov.data.mapper.mapToSectionEntityUpdate
 import com.shenawynkov.data.mapper.mapToSectionList
 import com.shenawynkov.domain.common.Resource
-import com.shenawynkov.domain.repositories.SectionsRepo
 import com.shenawynkov.domain.model.section.Section
 import com.shenawynkov.domain.model.section.SectionDetail
+import com.shenawynkov.domain.repositories.SectionsRepo
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.withContext
 import retrofit2.HttpException
 import java.io.IOException
 
@@ -23,8 +25,12 @@ class SectionsRepoImpl(private val apiService: ApiService, private val db: Secti
         return apiService.getSections()._links.viaplaySections.mapToSectionList()
     }
 
-    private suspend fun getSectionsFromDb(): List<Section> {
+     override suspend fun getSectionsFromDb(): List<Section> {
         return db.sectionDoa().getAllSections().mapToSectionList()
+    }
+
+    override suspend fun getFavSections(): List<Section> {
+        return db.sectionDoa().getAllFavSections().mapToSectionList()
     }
 
     override fun getSections(): Flow<Resource<List<Section>>> {
@@ -35,9 +41,14 @@ class SectionsRepoImpl(private val apiService: ApiService, private val db: Secti
                 emit(Resource.Loading<List<Section>>())
                 //emit  data
                 val list = getSectionsFromRemote()
-                emit(Resource.Success(list))
                 //updateDb
-                updateSections(list)
+                withContext(Dispatchers.IO)
+                {
+                    updateSections(list)
+                }
+                emit(Resource.Success(getSectionsFromDb()))
+
+
             } catch (e: HttpException) {
                 emit(
                     Resource.Error<List<Section>>(
@@ -57,7 +68,15 @@ class SectionsRepoImpl(private val apiService: ApiService, private val db: Secti
 
     }
 
-    override  fun getSection(id: String, url: String): Flow<Resource<SectionDetail?>> {
+    override suspend fun updateFav(fav: Boolean, id: String) {
+        withContext(Dispatchers.IO)
+        {
+            db.sectionDoa().updateFav(SectionEntityFavUpdate(id, fav))
+        }
+
+    }
+
+    override fun getSection(id: String, url: String): Flow<Resource<SectionDetail?>> {
 
 
         return flow {
@@ -65,24 +84,34 @@ class SectionsRepoImpl(private val apiService: ApiService, private val db: Secti
                 //emit loading until receiving data
                 emit(Resource.Loading<SectionDetail?>())
                 //emit  data
-                val section=getSectionFromRemote(url)
-                emit(Resource.Success(section))
+                val section = getSectionFromRemote(url)
                 //updateDb
-                updateSection(section)
+                withContext(Dispatchers.IO)
+                {
+                    updateSection(section)
+                }
+                emit(Resource.Success(getSectionFromDb(section.sectionId)))
+
+
             } catch (e: HttpException) {
                 emit(
                     Resource.Error<SectionDetail?>(
-                        e?.localizedMessage ?: "An unexpected error occurred",getSectionFromDb(id)
+                        e?.localizedMessage ?: "An unexpected error occurred", getSectionFromDb(id)
                     )
                 )
             } catch (e: IOException) {
-                emit(Resource.Error<SectionDetail?>("Couldn't reach server. Check your internet connection.",getSectionFromDb(id)))
+                emit(
+                    Resource.Error<SectionDetail?>(
+                        "Couldn't reach server. Check your internet connection.",
+                        getSectionFromDb(id)
+                    )
+                )
             }
         }
     }
 
     private suspend fun getSectionFromDb(id: String): SectionDetail? {
-        return db.sectionDetailDoa().getSection(id)?.mapToSectionDetail()
+        return db.sectionDoa().getSection(id).mapToSectionDetail()
     }
 
     private suspend fun getSectionFromRemote(url: String): SectionDetail {
@@ -92,13 +121,15 @@ class SectionsRepoImpl(private val apiService: ApiService, private val db: Secti
 
     private suspend fun updateSections(list: List<Section>) {
         list.forEach {
-            db.sectionDoa().saveSection(it.mapToSectionEntity())
+            val updated = db.sectionDoa().updateSection(it.mapToSectionEntityUpdate())
+            if (updated == 0)
+                db.sectionDoa().saveSection(it.mapToSectionEntity())
         }
     }
 
     private suspend fun updateSection(sectionDetail: SectionDetail) {
 
-        db.sectionDetailDoa().saveSection(sectionDetail.mapToSectionDetailEntity())
+        db.sectionDoa().updateSectionDetail(sectionDetail.mapToSectionEntityUpdate())
 
     }
 }

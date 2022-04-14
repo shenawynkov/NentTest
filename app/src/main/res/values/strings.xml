@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">NentTest</string>
+    <string name="to_fav">To Favourite</string>
 </resources>

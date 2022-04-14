@@ -8,5 +8,6 @@ data class Section(
     val href: String,
     val id: String,
     val name: String,
-    val title: String
+    val title: String,
+    var  fav:Boolean=false
 ):Parcelable

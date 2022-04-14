@@ -1,4 +1,4 @@
-package com.shenawynkov.nenttest.ui.home
+package com.shenawynkov.nenttest.ui.fav
 
 import android.content.Intent
 import android.os.Bundle
@@ -11,18 +11,19 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.shenawynkov.domain.model.section.Section
 import com.shenawynkov.nenttest.R
+import com.shenawynkov.nenttest.databinding.ActivityFavBinding
 import com.shenawynkov.nenttest.databinding.ActivityMainBinding
-import com.shenawynkov.nenttest.ui.fav.FavActivity
+import com.shenawynkov.nenttest.ui.home.HomeViewModel
+import com.shenawynkov.nenttest.ui.home.SectionsAdapter
 import com.shenawynkov.nenttest.ui.section.SectionActivity
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.android.synthetic.main.activity_main.*
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class HomeActivity : AppCompatActivity(), SectionsAdapter.SectionsListener {
-    private  val viewModel: HomeViewModel by viewModels()
+class FavActivity : AppCompatActivity(), SectionsAdapter.SectionsListener {
+    private  val viewModel: FavViewModel by viewModels()
     private lateinit var sectionsAdapter: SectionsAdapter
-    private lateinit var binding: ActivityMainBinding
+    private lateinit var binding: ActivityFavBinding
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,21 +35,18 @@ class HomeActivity : AppCompatActivity(), SectionsAdapter.SectionsListener {
     fun setup() {
 
         //binding
-        binding = DataBindingUtil.setContentView<ActivityMainBinding>(
+        binding = DataBindingUtil.setContentView<ActivityFavBinding>(
             this,
-            R.layout.activity_main
+            R.layout.activity_fav
         )
         binding.viewmodel = viewModel
         binding.lifecycleOwner = this
 
         //init views
         binding.rvSections.apply {
-            layoutManager = LinearLayoutManager(this@HomeActivity)
-            sectionsAdapter = SectionsAdapter(ArrayList(), this@HomeActivity)
+            layoutManager = LinearLayoutManager(this@FavActivity)
+            sectionsAdapter = SectionsAdapter(ArrayList(), this@FavActivity)
             adapter = sectionsAdapter
-        }
-        bt_fav.setOnClickListener {
-            startActivity(Intent(this,FavActivity::class.java))
         }
         //observers
         viewModel.sections.observe(this, Observer {
@@ -56,11 +54,7 @@ class HomeActivity : AppCompatActivity(), SectionsAdapter.SectionsListener {
                 return@Observer
             sectionsAdapter.setNewList(it)
         })
-        viewModel.errorMessage.observe(this, Observer {
-            if (it == null)
-                return@Observer
-            Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
-        })
+
     }
 
     override fun onSectionSelected(section: Section) {
@@ -74,8 +68,5 @@ class HomeActivity : AppCompatActivity(), SectionsAdapter.SectionsListener {
 
     }
 
-    override fun onResume() {
-        super.onResume()
-        viewModel.syncSections()
-    }
+
 }

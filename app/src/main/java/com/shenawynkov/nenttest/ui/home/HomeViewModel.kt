@@ -3,20 +3,32 @@ package com.shenawynkov.nenttest.ui.home
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.shenawynkov.domain.model.section.Section
-import com.shenawynkov.domain.usecases.SectionsUseCase
 import com.shenawynkov.domain.common.Resource
+import com.shenawynkov.domain.model.section.Section
+import com.shenawynkov.domain.usecases.FavouriteUseCase
+import com.shenawynkov.domain.usecases.SectionsUseCase
+import com.shenawynkov.domain.usecases.SyncSectionsDBUseCase
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-class HomeViewModel @Inject constructor(val sectionsUseCase: SectionsUseCase) : ViewModel() {
+@HiltViewModel
+class HomeViewModel @Inject constructor(
+    private val sectionsUseCase: SectionsUseCase,
+    private val favouriteUseCase: FavouriteUseCase,
+    private val syncSectionsDBUseCase: SyncSectionsDBUseCase
+) : ViewModel() {
     val loading = MutableLiveData(false)
     val errorMessage = MutableLiveData<String>()
     val sections = MutableLiveData<List<Section>>()
 
+    init {
+        getSections()
+    }
 
-    fun getSections() {
+    private fun getSections() {
         sectionsUseCase.invoke().onEach { result ->
             when (result) {
                 is Resource.Success -> {
@@ -40,4 +52,18 @@ class HomeViewModel @Inject constructor(val sectionsUseCase: SectionsUseCase) : 
 
         }.launchIn(viewModelScope)
     }
+
+    fun updateFav(id: String, fav: Boolean) {
+        viewModelScope.launch {
+            favouriteUseCase.invoke(fav, id)
+
+        }
+    }
+  fun syncSections()
+  {
+      viewModelScope.launch {
+         sections.value= syncSectionsDBUseCase.invoke()
+      }
+
+  }
 }

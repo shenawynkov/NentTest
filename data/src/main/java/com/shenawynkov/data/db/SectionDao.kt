@@ -1,8 +1,6 @@
 package com.shenawynkov.data.db
 
-import androidx.lifecycle.LiveData
 import androidx.room.*
-import com.shenawynkov.domain.model.section.Section
 
 @Dao
 interface SectionDao {
@@ -17,5 +15,15 @@ interface SectionDao {
 
     @Query("SELECT * FROM section")
     suspend fun getAllSections(): List<SectionEntity>
+    @Query("SELECT * FROM section WHERE fav=1")
+    suspend fun getAllFavSections(): List<SectionEntity>
 
+    @Update(entity = SectionEntity::class)
+    suspend fun updateSectionDetail(sectionEntityDetailUpdate: SectionEntityDetailUpdate)
+
+    @Update(entity = SectionEntity::class)
+    suspend fun updateFav(favUpdate: SectionEntityFavUpdate)
+
+    @Update(entity = SectionEntity::class)
+    suspend fun updateSection(sectionEntityUpdate: SectionEntityUpdate): Int
 }

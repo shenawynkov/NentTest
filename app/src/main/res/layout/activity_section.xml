@@ -18,6 +18,18 @@
         android:layout_height="match_parent"
         tools:context=".ui.section.SectionActivity">
 
+        <ImageView
+            android:id="@+id/iv_fav2"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginEnd="16dp"
+            android:padding="4dp"
+            android:onClick="@{v->viewmodel.updateFav()}"
+            app:layout_constraintBottom_toBottomOf="@+id/tv_title"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/tv_title"
+          android:src="@{viewmodel.sectionDetail.fav?@drawable/star_filled:@drawable/star}" />
+
         <ProgressBar
             android:id="@+id/progressBar2"
             style="?android:attr/progressBarStyle"
@@ -40,7 +52,7 @@
             android:textColor="@color/black"
             android:textSize="20sp"
             android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/iv_fav2"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
