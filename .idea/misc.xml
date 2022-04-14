@@ -3,8 +3,10 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
-        <entry key="..\:/Users/shenawynkov/AndroidStudioProjects/NentTest/app/src/main/res/layout/activity_main.xml" value="0.1859375" />
+        <entry key="..\:/Users/shenawynkov/AndroidStudioProjects/NentTest/app/src/main/res/layout/activity_fav.xml" value="0.2105978260869565" />
+        <entry key="..\:/Users/shenawynkov/AndroidStudioProjects/NentTest/app/src/main/res/layout/activity_main.xml" value="0.25" />
         <entry key="..\:/Users/shenawynkov/AndroidStudioProjects/NentTest/app/src/main/res/layout/activity_section.xml" value="0.1859375" />
+        <entry key="..\:/Users/shenawynkov/AndroidStudioProjects/NentTest/app/src/main/res/layout/item_section.xml" value="0.25" />
       </map>
     </option>
   </component>

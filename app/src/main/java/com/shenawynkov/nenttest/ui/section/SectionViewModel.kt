@@ -3,16 +3,22 @@ package com.shenawynkov.nenttest.ui.section
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.shenawynkov.domain.model.section.Section
-import com.shenawynkov.domain.usecases.SectionsUseCase
 import com.shenawynkov.domain.common.Resource
+import com.shenawynkov.domain.model.section.Section
 import com.shenawynkov.domain.model.section.SectionDetail
+import com.shenawynkov.domain.usecases.FavouriteUseCase
 import com.shenawynkov.domain.usecases.SectionUseCase
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-class SectionViewModel @Inject constructor(val sectionUseCase: SectionUseCase) : ViewModel() {
+@HiltViewModel
+class SectionViewModel @Inject constructor(
+    private val sectionUseCase: SectionUseCase,
+    private val favouriteUseCase: FavouriteUseCase
+) : ViewModel() {
     val loading = MutableLiveData(false)
     val errorMessage = MutableLiveData<String>()
     val sectionDetail = MutableLiveData<SectionDetail>()
@@ -45,5 +51,18 @@ class SectionViewModel @Inject constructor(val sectionUseCase: SectionUseCase) :
 
         }.launchIn(viewModelScope)
 
+    }
+
+    fun updateFav() {
+        sectionDetail.value?.let {
+            sectionDetail.value = it.copy(fav = !it.fav)
+
+            viewModelScope.launch {
+
+                favouriteUseCase.invoke(!it.fav, it.sectionId)
+
+
+            }
+        }
     }
 }

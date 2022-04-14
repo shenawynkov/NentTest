@@ -21,7 +21,8 @@ class DBModule {
     fun provideDatabase(@ApplicationContext applicationContext: Context) = Room.databaseBuilder(
         applicationContext,
         SectionDatabase::class.java, "sectionDB"
-    ).build()
+    )	.fallbackToDestructiveMigration()
+        .build()
 
 
 }
