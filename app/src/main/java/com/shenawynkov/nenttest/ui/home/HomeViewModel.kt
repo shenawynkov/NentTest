@@ -23,6 +23,7 @@ class HomeViewModel @Inject constructor(
     val loading = MutableLiveData(false)
     val errorMessage = MutableLiveData<String>()
     val sections = MutableLiveData<List<Section>>()
+    var backStackStatus = false
 
     init {
         getSections()
@@ -59,11 +60,14 @@ class HomeViewModel @Inject constructor(
 
         }
     }
-  fun syncSections()
-  {
-      viewModelScope.launch {
-         sections.value= syncSectionsDBUseCase.invoke()
-      }
 
-  }
+    fun syncSections() {
+        if (backStackStatus) {
+            viewModelScope.launch {
+                sections.value = syncSectionsDBUseCase.invoke()
+            }
+        }
+        backStackStatus=false
+
+    }
 }

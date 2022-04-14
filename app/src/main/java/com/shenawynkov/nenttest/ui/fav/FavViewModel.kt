@@ -16,12 +16,11 @@ import javax.inject.Inject
 
 @HiltViewModel
 class FavViewModel @Inject constructor(
-
     private val favouriteUseCase: FavouriteUseCase
-
 ) : ViewModel() {
 
     val sections = MutableLiveData<List<Section>>()
+    var backStackStatus = false
 
     init {
         getSections()
@@ -39,6 +38,13 @@ class FavViewModel @Inject constructor(
             favouriteUseCase.invoke(fav, id)
 
         }
+    }
+    fun syncSections() {
+        if (backStackStatus) {
+            getSections()
+        }
+        backStackStatus=false
+
     }
 
 }

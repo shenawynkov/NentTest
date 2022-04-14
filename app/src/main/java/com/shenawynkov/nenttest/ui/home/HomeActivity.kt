@@ -7,7 +7,6 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.shenawynkov.domain.model.section.Section
 import com.shenawynkov.nenttest.R
@@ -16,11 +15,10 @@ import com.shenawynkov.nenttest.ui.fav.FavActivity
 import com.shenawynkov.nenttest.ui.section.SectionActivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.activity_main.*
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class HomeActivity : AppCompatActivity(), SectionsAdapter.SectionsListener {
-    private  val viewModel: HomeViewModel by viewModels()
+    private val viewModel: HomeViewModel by viewModels()
     private lateinit var sectionsAdapter: SectionsAdapter
     private lateinit var binding: ActivityMainBinding
 
@@ -31,7 +29,13 @@ class HomeActivity : AppCompatActivity(), SectionsAdapter.SectionsListener {
 
     }
 
-    fun setup() {
+    override fun onResume() {
+        super.onResume()
+        viewModel.syncSections()
+    }
+
+
+    private fun setup() {
 
         //binding
         binding = DataBindingUtil.setContentView<ActivityMainBinding>(
@@ -48,7 +52,8 @@ class HomeActivity : AppCompatActivity(), SectionsAdapter.SectionsListener {
             adapter = sectionsAdapter
         }
         bt_fav.setOnClickListener {
-            startActivity(Intent(this,FavActivity::class.java))
+            viewModel.backStackStatus = true
+            startActivity(Intent(this, FavActivity::class.java))
         }
         //observers
         viewModel.sections.observe(this, Observer {
@@ -64,9 +69,8 @@ class HomeActivity : AppCompatActivity(), SectionsAdapter.SectionsListener {
     }
 
     override fun onSectionSelected(section: Section) {
-        val intent = Intent(this, SectionActivity::class.java)
-        intent.putExtra(SectionActivity.SECTION, section)
-        startActivity(intent)
+        viewModel.backStackStatus = true
+        moveToSectionActivity(section)
     }
 
     override fun onFavChanged(fav: Boolean, id: String) {
@@ -74,8 +78,10 @@ class HomeActivity : AppCompatActivity(), SectionsAdapter.SectionsListener {
 
     }
 
-    override fun onResume() {
-        super.onResume()
-        viewModel.syncSections()
+
+    private fun moveToSectionActivity(section: Section) {
+        val intent = Intent(this, SectionActivity::class.java)
+        intent.putExtra(SectionActivity.SECTION, section)
+        startActivity(intent)
     }
 }
